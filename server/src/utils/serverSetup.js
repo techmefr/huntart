@@ -1,3 +1,5 @@
+const { testConnection } = require("./dbConnection");
+
 async function startServer(app, PORT) {
   try {
     await testConnection();
@@ -6,11 +8,8 @@ async function startServer(app, PORT) {
     });
   } catch (error) {
     console.error("Failed to start server:", error);
-    if (error.code === "ER_BAD_DB_ERROR") {
-      console.log(
-        "Database does not exist. Please create it or check your configuration."
-      );
-    }
     process.exit(1);
   }
 }
+
+module.exports = { startServer };
