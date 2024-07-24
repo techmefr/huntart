@@ -12,10 +12,8 @@ CREATE TABLE user
         (100) UNIQUE NOT NULL,
     password VARCHAR
         (255) NOT NULL,
-    dateCreated DATETIME DEFAULT CURRENT_TIMESTAMP,
-    jwt VARCHAR
-        (255),
-    lastLogin DATETIME,
+    dateCreated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    lastLogin TIMESTAMP NULL,
     role ENUM
         ('admin', 'moderator', 'standard_user') DEFAULT 'standard_user'
 );
@@ -42,7 +40,7 @@ CREATE TABLE user
     authorId INT NOT NULL,
     location VARCHAR
                         (255) NOT NULL,
-    dateAdded DATETIME DEFAULT CURRENT_TIMESTAMP,
+    dateAdded TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     postedBy INT NOT NULL,
     photoUrlSmall VARCHAR
                         (255),
@@ -54,11 +52,14 @@ CREATE TABLE user
                         ('active', 'removed') DEFAULT 'active',
     FOREIGN KEY
                         (postedBy) REFERENCES user
-                        (userId),
-    FOREIGN KEY
-                        (authorId) REFERENCES author
-                        (authorId)
-);
+                        (userId) ON
+                        DELETE CASCADE,
+    FOREIGN KEY (authorId)
+                        REFERENCES author
+                        (authorId) ON
+                        DELETE
+                        SET NULL
+                        );
 
                         CREATE INDEX idx_streetart_authorId ON streetart(authorId);
                         CREATE INDEX idx_streetart_postedBy ON streetart(postedBy);
@@ -80,14 +81,16 @@ CREATE TABLE user
     userId INT NOT NULL,
     streetArtId INT NOT NULL,
     content TEXT NOT NULL,
-    datePosted DATETIME DEFAULT CURRENT_TIMESTAMP,
+    datePosted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     isDeleted BOOLEAN DEFAULT FALSE,
     FOREIGN KEY
                                         (userId) REFERENCES user
-                                        (userId),
-    FOREIGN KEY
-                                        (streetArtId) REFERENCES streetart
-                                        (streetArtId)
+                                        (userId) ON
+                                        DELETE CASCADE,
+    FOREIGN KEY (streetArtId)
+                                        REFERENCES streetart
+                                        (streetArtId) ON
+                                        DELETE CASCADE
 );
 
                                         CREATE INDEX idx_comment_userId ON comment(userId);
@@ -99,92 +102,101 @@ CREATE TABLE user
                                                 userId INT NOT NULL,
                                                 streetArtId INT NOT NULL,
                                                 PRIMARY KEY (userId, streetArtId),
-                                                FOREIGN KEY (userId) REFERENCES user(userId),
-                                                FOREIGN KEY (streetArtId) REFERENCES streetart(streetArtId)
+                                                FOREIGN KEY (userId) REFERENCES user(userId) ON DELETE CASCADE,
+                                                FOREIGN KEY (streetArtId) REFERENCES streetart(streetArtId) ON DELETE CASCADE
                                         );
 
                                         CREATE INDEX idx_favorite_userId ON favorite(userId);
                                         CREATE INDEX idx_favorite_streetArtId ON favorite(streetArtId);
 
-                                        CREATE TABLE `like`
+                                        CREATE TABLE emotion
                                         (
-    userId INT NOT NULL,
-    streetArtId INT NOT NULL,
-    PRIMARY KEY
-                                        (userId, streetArtId),
-    FOREIGN KEY
-                                        (userId) REFERENCES user
-                                        (userId),
-    FOREIGN KEY
-                                        (streetArtId) REFERENCES streetart
-                                        (streetArtId)
+                                                emotionId INT
+                                                AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR
+                                                (50) UNIQUE NOT NULL
 );
 
-                                        CREATE INDEX idx_like_userId ON `like`
-                                        (userId);
-                                        CREATE INDEX idx_like_streetArtId ON `like`
-                                        (streetArtId);
+                                                CREATE TABLE user_emotion
+                                                (
+                                                        userId INT NOT NULL,
+                                                        streetArtId INT NOT NULL,
+                                                        emotionId INT NOT NULL,
+                                                        PRIMARY KEY (userId, streetArtId, emotionId),
+                                                        FOREIGN KEY (userId) REFERENCES user(userId) ON DELETE CASCADE,
+                                                        FOREIGN KEY (streetArtId) REFERENCES streetart(streetArtId) ON DELETE CASCADE,
+                                                        FOREIGN KEY (emotionId) REFERENCES emotion(emotionId) ON DELETE CASCADE
+                                                );
 
-                                        CREATE TABLE sanction
-                                        (
-                                                sanctionId INT
-                                                AUTO_INCREMENT PRIMARY KEY,
+                                                CREATE INDEX idx_user_emotion_userId ON user_emotion(userId);
+                                                CREATE INDEX idx_user_emotion_streetArtId ON user_emotion(streetArtId);
+                                                CREATE INDEX idx_user_emotion_emotionId ON user_emotion(emotionId);
+
+                                                CREATE TABLE sanction
+                                                (
+                                                        sanctionId INT
+                                                        AUTO_INCREMENT PRIMARY KEY,
     userId INT NOT NULL,
     type ENUM
-                                                ('login_failure', 'misbehavior') NOT NULL,
+                                                        ('login_failure', 'misbehavior') NOT NULL,
     duration INT NOT NULL,
-    dateStart DATETIME DEFAULT CURRENT_TIMESTAMP,
-    dateEnd DATETIME NOT NULL,
+    dateStart TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dateEnd TIMESTAMP NOT NULL,
     FOREIGN KEY
-                                                (userId) REFERENCES user
-                                                (userId)
+                                                        (userId) REFERENCES user
+                                                        (userId) ON
+                                                        DELETE CASCADE
 );
 
-                                                CREATE INDEX idx_sanction_userId ON sanction(userId);
-                                                CREATE INDEX idx_sanction_type ON sanction(type);
-                                                CREATE INDEX idx_sanction_dateEnd ON sanction(dateEnd);
+                                                        CREATE INDEX idx_sanction_userId ON sanction(userId);
+                                                        CREATE INDEX idx_sanction_type ON sanction(type);
+                                                        CREATE INDEX idx_sanction_dateEnd ON sanction(dateEnd);
 
-                                                CREATE TABLE report
-                                                (
-                                                        reportId INT
-                                                        AUTO_INCREMENT PRIMARY KEY,
+                                                        CREATE TABLE report
+                                                        (
+                                                                reportId INT
+                                                                AUTO_INCREMENT PRIMARY KEY,
     userId INT NOT NULL,
     streetArtId INT NOT NULL,
     reason TEXT NOT NULL,
-    dateReported DATETIME DEFAULT CURRENT_TIMESTAMP,
+    dateReported TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status ENUM
-                                                        ('pending', 'resolved') DEFAULT 'pending',
-    FOREIGN KEY
-                                                        (userId) REFERENCES user
-                                                        (userId),
-    FOREIGN KEY
-                                                        (streetArtId) REFERENCES streetart
-                                                        (streetArtId)
-);
-
-                                                        CREATE INDEX idx_report_userId ON report(userId);
-                                                        CREATE INDEX idx_report_streetArtId ON report(streetArtId);
-                                                        CREATE INDEX idx_report_dateReported ON report(dateReported);
-
-                                                        CREATE TABLE streetart_tag
-                                                        (
-                                                                streetArtId INT NOT NULL,
-                                                                tagId INT NOT NULL,
-                                                                PRIMARY KEY (streetArtId, tagId),
-                                                                FOREIGN KEY (streetArtId) REFERENCES streetart(streetArtId),
-                                                                FOREIGN KEY (tagId) REFERENCES tag(tagId)
-                                                        );
-
-                                                        CREATE TABLE login_attempt
-                                                        (
-                                                                attemptId INT
-                                                                AUTO_INCREMENT PRIMARY KEY,
-    userId INT NOT NULL,
-    attemptTime DATETIME NOT NULL,
+                                                                ('pending', 'resolved') DEFAULT 'pending',
     FOREIGN KEY
                                                                 (userId) REFERENCES user
-                                                                (userId)
+                                                                (userId) ON
+                                                                DELETE CASCADE,
+    FOREIGN KEY (streetArtId)
+                                                                REFERENCES streetart
+                                                                (streetArtId) ON
+                                                                DELETE CASCADE
 );
 
-                                                                CREATE INDEX idx_login_attempt_userId ON login_attempt(userId);
-                                                                CREATE INDEX idx_login_attempt_attemptTime ON login_attempt(attemptTime);
+                                                                CREATE INDEX idx_report_userId ON report(userId);
+                                                                CREATE INDEX idx_report_streetArtId ON report(streetArtId);
+                                                                CREATE INDEX idx_report_dateReported ON report(dateReported);
+
+                                                                CREATE TABLE streetart_tag
+                                                                (
+                                                                        streetArtId INT NOT NULL,
+                                                                        tagId INT NOT NULL,
+                                                                        PRIMARY KEY (streetArtId, tagId),
+                                                                        FOREIGN KEY (streetArtId) REFERENCES streetart(streetArtId) ON DELETE CASCADE,
+                                                                        FOREIGN KEY (tagId) REFERENCES tag(tagId) ON DELETE CASCADE
+                                                                );
+
+                                                                CREATE TABLE login_attempt
+                                                                (
+                                                                        attemptId INT
+                                                                        AUTO_INCREMENT PRIMARY KEY,
+    userId INT NOT NULL,
+    attemptTime TIMESTAMP NOT NULL,
+    success BOOLEAN NOT NULL,
+    FOREIGN KEY
+                                                                        (userId) REFERENCES user
+                                                                        (userId) ON
+                                                                        DELETE CASCADE
+);
+
+                                                                        CREATE INDEX idx_login_attempt_userId ON login_attempt(userId);
+                                                                        CREATE INDEX idx_login_attempt_attemptTime ON login_attempt(attemptTime);
