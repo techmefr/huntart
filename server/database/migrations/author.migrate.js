@@ -1,4 +1,4 @@
-const { pool } = require('../src/utils/dbConnection');
+const { pool } = require('../../src/utils/dbConnection');
 
 async function migrateAuthor() {
   const connection = await pool.getConnection();
