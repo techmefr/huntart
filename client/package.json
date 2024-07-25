@@ -12,7 +12,6 @@
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
     "prepare": "husky install"
   },
- 
   "dependencies": {
     "@tanstack/query-devtools": "^5.51.9",
     "@tanstack/react-query": "^5.51.9",
@@ -27,6 +26,7 @@
     "react-image-crop": "^11.0.6",
     "react-router-dom": "^6.25.1",
     "react-toastify": "^10.0.5",
+    "rimraf": "^6.0.1",
     "yup": "^1.4.0",
     "zustand": "^4.5.4"
   },
