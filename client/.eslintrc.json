@@ -1,0 +1,12 @@
+{
+    "extends": [
+      "airbnb",
+      "airbnb/hooks",
+      "prettier"
+    ],
+    "rules": {
+      "prettier/prettier": "error",
+      "react/react-in-jsx-scope": "off"
+    }
+  }
+  
