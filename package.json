@@ -1,0 +1,59 @@
+{
+  "name": "huntart",
+  "version": "1.0.0",
+  "description": "A React and Express.js web app for sharing and commenting on street art, with features for uploading images, adding descriptions and tags, and engaging with others.",
+  "main": "index.js",
+  "scripts": {
+    "prepare": "husky && husky install",
+    "lint": "eslint 'client/src/**/*.{js,jsx,ts,tsx}' 'server/src/**/*.{js,jsx,ts,tsx}'",
+    "format": "prettier --write 'client/src/**/*.{js,jsx,ts,tsx}' 'server/src/**/*.{js,jsx,ts,tsx}'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/techmefr/huntart.git"
+  },
+  "keywords": [
+    "streetart",
+    "picture",
+    "street",
+    "art",
+    "commenting",
+    "react",
+    "express",
+    "full",
+    "stack",
+    "full-stack",
+    "image",
+    "sharing",
+    "art",
+    "sharing",
+    "social",
+    "media"
+  ],
+  "author": "techmefr",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/techmefr/huntart/issues"
+  },
+  "homepage": "https://github.com/techmefr/huntart#readme",
+  "devDependencies": {
+    "eslint": "^8.23.1",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-react": "^7.30.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.2.7",
+    "prettier": "^2.8.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  }
+}

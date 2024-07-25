@@ -1,0 +1,72 @@
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  lint-client:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16, 18, 20, 22]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Cache client dependencies
+      id: cache-client-deps
+      uses: actions/cache@v3
+      with:
+        path: client/node_modules
+        key: ${{ runner.os }}-client-${{ matrix.node-version }}-${{ hashFiles('client/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-client-${{ matrix.node-version }}-
+    - name: Install dependencies
+      if: steps.cache-client-deps.outputs.cache-hit != 'true'
+      run: |
+        cd client
+        npm install
+    - name: Run ESLint
+      run: |
+        cd client
+        npx eslint 'src/**/*.{js,jsx,ts,tsx}'
+    - name: Run Prettier
+      run: |
+        cd client
+        npx prettier --check 'src/**/*.{js,jsx,ts,tsx}'
+
+  lint-server:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16, 18, 20, 22]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Cache server dependencies
+      id: cache-server-deps
+      uses: actions/cache@v3
+      with:
+        path: server/node_modules
+        key: ${{ runner.os }}-server-${{ matrix.node-version }}-${{ hashFiles('server/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-server-${{ matrix.node-version }}-
+    - name: Install dependencies
+      if: steps.cache-server-deps.outputs.cache-hit != 'true'
+      run: |
+        cd server
+        npm install
+    - name: Run ESLint
+      run: |
+        cd server
+        npx eslint 'src/**/*.{js,jsx,ts,tsx}'
+    - name: Run Prettier
+      run: |
+        cd server
+        npx prettier --check 'src/**/*.{js,jsx,ts,tsx}'
