@@ -1,19 +1,19 @@
-const pool = require("../config/database");
+const pool = require('../config/database');
 
 async function testConnection() {
   try {
     const connection = await pool.getConnection();
 
     await connection.query(
-      `CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME}`
+      `CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME}`,
     );
 
     await connection.query(`USE ${process.env.DB_NAME}`);
 
-    console.log("Successfully connected to the database.");
+    console.info('Successfully connected to the database.');
     connection.release();
   } catch (error) {
-    console.error("Error connecting to the database:", error);
+    console.info('Error connecting to the database:', error);
     throw error;
   }
 }
